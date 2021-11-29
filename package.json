@@ -1,0 +1,252 @@
+{
+  "name": "mysql",
+  "displayName": "mysql",
+  "description": "mysql tool",
+  "version": "0.0.1",
+  "publisher": "github.com/qq51529210",
+  "engines": {
+    "vscode": "^1.62.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mysql.refreshConnections",
+        "title": "Refresh Connections",
+        "icon": {
+          "light": "images/light/refresh.svg",
+          "dark": "images/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "mysql.addConnection",
+        "title": "Add Connection",
+        "icon": {
+          "light": "images/light/add.svg",
+          "dark": "images/dark/add.svg"
+        }
+      },
+      {
+        "command": "mysql.editConnection",
+        "title": "Edit"
+      },
+      {
+        "command": "mysql.removeConnection",
+        "title": "Remove"
+      },
+      {
+        "command": "mysql.refreshSchemas",
+        "title": "Refresh Schemas",
+        "icon": {
+          "light": "images/light/refresh.svg",
+          "dark": "images/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "mysql.addSchema",
+        "title": "Add Schema",
+        "icon": {
+          "light": "images/light/add.svg",
+          "dark": "images/dark/add.svg"
+        }
+      },
+      {
+        "command": "mysql.removeSchema",
+        "title": "Remove"
+      },
+      {
+        "command": "mysql.refreshTables",
+        "title": "Refresh Tables",
+        "icon": {
+          "light": "images/light/refresh.svg",
+          "dark": "images/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "mysql.addTable",
+        "title": "Add Table",
+        "icon": {
+          "light": "images/light/add.svg",
+          "dark": "images/dark/add.svg"
+        }
+      },
+      {
+        "command": "mysql.editTable",
+        "title": "Edit"
+      },
+      {
+        "command": "mysql.removeTable",
+        "title": "Remove"
+      },
+      {
+        "command": "mysql.mockTable",
+        "title": "Mock"
+      },
+      {
+        "command": "mysql.addCollection",
+        "title": "Add Collection",
+        "icon": {
+          "light": "images/light/add.svg",
+          "dark": "images/dark/add.svg"
+        }
+      },
+      {
+        "command": "mysql.refreshCollections",
+        "title": "Refresh Collections",
+        "icon": {
+          "light": "images/light/refresh.svg",
+          "dark": "images/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "mysql.removeCollection",
+        "title": "Remove"
+      },
+      {
+        "command": "mysql.sql",
+        "title": "SQL"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "mysql",
+          "name": "mysql"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "mysql",
+        "contents": "No connection found.\n[Add One](command:mysql.addConnection)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "mysql.refreshConnections",
+          "when": "view == mysql",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.addConnection",
+          "when": "view == mysql",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "mysql.refreshSchemas",
+          "when": "view == mysql && viewItem == connection",
+          "group": "inline"
+        },
+        {
+          "command": "mysql.editConnection",
+          "when": "view == mysql && viewItem == connection",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.removeConnection",
+          "when": "view == mysql && viewItem == connection",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.addSchema",
+          "when": "view == mysql && viewItem == connection",
+          "group": "inline"
+        },
+        {
+          "command": "mysql.removeSchema",
+          "when": "view == mysql && viewItem == schema",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.sql",
+          "when": "view == mysql && viewItem == schema",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.addTable",
+          "when": "view == mysql && viewItem == tables",
+          "group": "inline"
+        },
+        {
+          "command": "mysql.refreshTables",
+          "when": "view == mysql && viewItem == tables",
+          "group": "inline"
+        },
+        {
+          "command": "mysql.mockTable",
+          "when": "view == mysql && viewItem == table",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.editTable",
+          "when": "view == mysql && viewItem == table",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.removeTable",
+          "when": "view == mysql && viewItem == table",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.addCollection",
+          "when": "view == mysql && viewItem == collections",
+          "group": "inline"
+        },
+        {
+          "command": "mysql.refreshCollections",
+          "when": "view == mysql && viewItem == collections",
+          "group": "inline"
+        },
+        {
+          "command": "mysql.removeCollection",
+          "when": "view == mysql && viewItem == collection",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p -w . --outDir out",
+    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.62.0",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "@vscode/test-electron": "^1.6.2",
+    "eslint": "^7.32.0",
+    "glob": "^7.1.7",
+    "mocha": "^9.1.1",
+    "prettier": "^2.4.1",
+    "ts-loader": "^9.2.5",
+    "typescript": "^4.4.3",
+    "webpack": "^5.52.1",
+    "webpack-cli": "^4.8.0"
+  },
+  "dependencies": {
+    "@mysql/xdevapi": "^8.0.26",
+    "@types/express": "^4.17.13",
+    "@types/mockjs": "^1.0.4",
+    "express": "^4.17.1",
+    "mockjs": "^1.1.0"
+  }
+}
