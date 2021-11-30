@@ -3,7 +3,7 @@
   "displayName": "mysql",
   "description": "mysql tool",
   "version": "0.0.1",
-  "publisher": "github.com/qq51529210",
+  "publisher": "qq51529210",
   "repository": "https://github.com/qq51529210/vscode-mysql",
   "license": "MIT",
   "engines": {
