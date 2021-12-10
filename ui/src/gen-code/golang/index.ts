@@ -15,11 +15,49 @@ class StmtFunc {
   text = "";
 }
 
-class NullField {
+class QueryField {
+  nullName = "";
+  nullType = "";
   name = "";
   type = "";
-  go = "";
+  scan = "";
+  nullAssign(tab: string) {
+    let str = "\t" + tab;
+    str += `if ${this.nullName}.Valid {`;
+    str += "\n\t\t" + tab;
+    if (this.type === "sql.NullInt64") {
+      str += `${this.name} = ${this.type}(${this.nullName}.Int64)`;
+    } else if (this.type === "sql.NullFloat64") {
+      str += `${this.name} = ${this.type}(${this.nullName}.Float64)`;
+    } else {
+      str += `${this.name} = ${this.nullName}.String`;
+    }
+    str += "\n\t" + tab + "}";
+    return str;
+  }
 }
+
+const initQueryFields = (col: Column[], name: string) => {
+  return col.map(v => {
+    let f = new QueryField();
+    f.name = `${name}.${snakeCaseToPascalCase(v.name)}`;
+    f.type = goType(v.type);
+    if (v.nullable) {
+      f.nullName = `${snakeCaseToCamelCase(v.name)}`;
+      if (f.type.indexOf("int") !== -1) {
+        f.nullType = "sql.NullInt64";
+      } else if (f.type.indexOf("float") !== -1) {
+        f.nullType = "sql.NullFloat64";
+      } else {
+        f.nullType = "sql.NullString";
+      }
+      f.scan = "&" + f.nullName;
+    } else {
+      f.scan = "&" + f.name;
+    }
+    return f;
+  });
+};
 
 export const genCode = (table: Table): string => {
   //
@@ -42,6 +80,8 @@ ${genInitStmt(struct, stmt)}
 type ${struct} {
   ${genFields(table)}
 }
+
+${genSelectPage(struct, table)}
 
 `;
   //
@@ -193,55 +233,22 @@ const genSelectBy = (
   func.text = `// ${func.sql}`;
   func.text += "\n";
   //
-  let nuc = nc.filter(v => v.nullable);
-  if (nuc.length) {
-    let nf = nuc.map(v => {
-      let f = new NullField();
-      f.name = `${snakeCaseToCamelCase(v.name)}`;
-      f.go = goType(v.type);
-      if (f.go.indexOf("int") !== -1) {
-        f.type = "sql.NullInt64";
-      } else if (f.go.indexOf("float") !== -1) {
-        f.type = "sql.NullFloat64";
-      } else {
-        f.type = "sql.NullString";
-      }
-      return f;
-    });
-    let scan = nc.map(v => {
-      if (v.nullable) {
-        return `_${snakeCaseToCamelCase(v.name)}`;
-      } else {
-        return `t.${snakeCaseToPascalCase(v.name)}`;
-      }
-    });
+  let query = initQueryFields(nc, "t");
+  let nullable = query.filter(v => v.nullName || v.nullType);
+  if (nullable.length) {
     func.text += `func (t *${struct}) SelectBy${kcField}() error {
     var (
-      ${nf.map(v => `_${v.name} ${v.type}`).join(",\n")}
+      ${nullable.map(v => `${v.nullName} ${v.nullType}`).join(",\n")}
     )
     err := ${func.stmt}.QueryRow(
         t.${kcField}
     ).Scan(
-        ${scan.join(",\n\t\t")}
+        ${query.map(v => v.scan).join(",\n\t\t")}
     )
     if err != nil {
         return err
-    }`;
-    nf.forEach(v => {
-      func.text += "\n\t";
-      func.text += `if _${v.name}.Valid {`;
-      func.text += "\n\t\t";
-      let name = snakeCaseToPascalCase(v.name);
-      if (v.type === "sql.NullInt64") {
-        func.text += `t.${name} = ${v.go}(_${v.name}.Int64)`;
-      } else if (v.type === "sql.NullFloat64") {
-        func.text += `t.${name} = ${v.go}(_${v.name}.Float64)`;
-      } else {
-        func.text += `t.${name} = _${v.name}.String`;
-      }
-      func.text += "\n\t}";
-    });
-    func.text += `
+    }
+${nullable.map(v => v.nullAssign("")).join("\n\t")}
     return nil
 }`;
   } else {
@@ -257,7 +264,61 @@ const genSelectBy = (
   return funcs;
 };
 
-const genSelectPage = () => {};
+const genSelectPage = (struct: string, table: Table) => {
+  let text = `func Select${struct}(db *sql.DB, where, orderBy, order, offset, count string) ([]*${struct}, error) {
+    var buf strings.Builder
+    buf.WriteString("select * from ${table.name} where ")
+    buf.WriteString(where)
+    buf.WriteString(" order by ")
+    buf.WriteString(orderBy)
+    buf.WriteString(" ")
+    buf.WriteString(order)
+    buf.WriteString(" limit")
+    buf.WriteString(offset)
+    buf.WriteString(",")
+    buf.WriteString(count)
+    rows, err := db.Query(buf.String())
+    if err != nil {
+        return err
+    }`; //
+  let query = initQueryFields(table.columns, table.name);
+  let nullable = query.filter(v => v.nullName || v.nullType);
+  if (nullable.length) {
+    text += `
+    var (
+      ${nullable.map(v => `${v.nullName} ${v.nullType}`).join(",\n")}
+    )
+    ${table.name}s := make([]*${struct}, 0)
+    for rows.Next() {
+        ${table.name} = new(${struct})
+        err = rows.Scan(
+            ${query.map(v => v.scan).join(",\n\t\t\t")}
+        )
+        if err != nil {
+          return err
+        }
+${nullable.map(v => v.nullAssign("\t")).join("\n\t\t")}
+        ${table.name}s = append(${table.name}s, ${table.name})
+    }
+    return ${table.name}s, nil
+}`;
+  } else {
+    text += `
+    for rows.Next() {
+        ${table.name} = new (${struct})
+        err = rows.Scan(
+            ${query.map(v => v.scan).join(",\n\t\t\t")}
+        )
+        if err != nil {
+          return err
+        }
+        ${table.name}s = append(${table.name}s, ${table.name})
+    }
+    return ${table.name}s, nil
+}`;
+  }
+  return text;
+};
 
 const genInitStmt = (struct: string, stmts: Stmt[]): string => {
   let str = "var (\n";
@@ -342,24 +403,3 @@ const goType = (type: string): string => {
       return "string";
   }
 };
-
-// // select pwd=? from t1 where name=?
-// func (t *T1) SelectByName(){
-//   return stmtT1SelectByName.QueryRow(
-//   t.Pwd,
-//   t.Name,
-//   if nil != err {
-//     return nil, err
-//   }
-
-//   var (
-//     _pwd sql.NullString
-//   )
-//   return stmtT1SelectByName.QueryRow(
-//         t.Pwd,
-//   t.Name,
-//   ).Scan(
-//     &_pwd
-// )
-// }	)
-// }
