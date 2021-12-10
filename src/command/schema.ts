@@ -4,6 +4,7 @@ import { TreeItem } from "../treeview/item";
 import * as db from "../dao/schema";
 import { onError } from ".";
 import { panel as sqlPanel } from "../webview/sql";
+import { panel as codePanel } from "../webview/gen-code";
 
 export const refresh = () =>
   vscode.commands.registerCommand("mysql.refreshSchemas", (...args: any[]) => {
@@ -66,5 +67,14 @@ export const sql = (context: vscode.ExtensionContext) =>
     let connection = item.parent?.label as string;
     let schema = item?.label as string;
     const panel = sqlPanel(connection, schema);
+    context.subscriptions.push(panel);
+  });
+
+export const genCode = (context: vscode.ExtensionContext) =>
+  vscode.commands.registerCommand("mysql.genCode", async (...args: any[]) => {
+    let item = args[0] as TreeItem;
+    let connection = item.parent?.label as string;
+    let schema = item?.label as string;
+    const panel = codePanel(connection, schema);
     context.subscriptions.push(panel);
   });

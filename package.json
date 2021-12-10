@@ -114,6 +114,10 @@
       {
         "command": "mysql.sql",
         "title": "SQL"
+      },
+      {
+        "command": "mysql.genCode",
+        "title": "Code"
       }
     ],
     "views": {
@@ -171,6 +175,11 @@
         },
         {
           "command": "mysql.sql",
+          "when": "view == mysql && viewItem == schema",
+          "group": "navigation"
+        },
+        {
+          "command": "mysql.genCode",
           "when": "view == mysql && viewItem == schema",
           "group": "navigation"
         },

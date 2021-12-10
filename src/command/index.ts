@@ -13,6 +13,7 @@ export const init = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(schema.add());
   context.subscriptions.push(schema.remove());
   context.subscriptions.push(schema.sql(context));
+  context.subscriptions.push(schema.genCode(context));
   context.subscriptions.push(table.refresh());
   context.subscriptions.push(table.add(context));
   context.subscriptions.push(table.edit(context));
