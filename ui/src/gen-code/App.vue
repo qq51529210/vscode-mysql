@@ -70,7 +70,7 @@ const onTableChange = (v: string) => {
     let table = data.tables.find(t => t.name === v)
     if (table) {
         data.table = table
-        data.editor.setValue(golang(table))
+        data.editor.setValue(golang(data.props.schema, table))
     }
 }
 
@@ -138,9 +138,7 @@ onMounted(() => {
             <el-button type="primary" plain size="mini" @click="onCopy">Copy</el-button>
         </el-col>
     </el-row>
-    <div>
-        <textarea ref="textarea" />
-    </div>
+    <textarea ref="textarea" />
 </template>
 
 <style>

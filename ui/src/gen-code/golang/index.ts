@@ -1,4 +1,10 @@
-import { Table, Column, snakeCaseToPascalCase, snakeCaseToCamelCase } from "..";
+import {
+  Table,
+  Column,
+  snakeCaseToPascalCase,
+  snakeCaseToCamelCase,
+  pascalCaseToSnakeCase,
+} from "..";
 
 class Stmt {
   name = "";
@@ -59,7 +65,7 @@ const initQueryFields = (col: Column[], name: string) => {
   });
 };
 
-export const genCode = (table: Table): string => {
+export const genCode = (schema: string, table: Table): string => {
   //
   let struct = snakeCaseToPascalCase(table.name);
   let execFunc: StmtFunc[] = [];
@@ -70,7 +76,9 @@ export const genCode = (table: Table): string => {
   execFunc = genDelete(struct, table, execFunc);
   stmt = execFunc.map(v => new Stmt(v.stmt, v.sql));
   //
-  let str = `import (
+  let str = `package ${pascalCaseToSnakeCase(schema)}
+
+import (
     "database/sql"
     "strings"
 )
@@ -205,13 +213,7 @@ const genDeleteBy = (
 const genSelect = (struct: string, table: Table, funcs: StmtFunc[]) => {
   let kc: Column[] = table.columns.filter(v => v.primary || v.unique);
   kc.forEach(v => {
-    funcs = genSelectBy(
-      struct,
-      table,
-      funcs,
-      table.columns.filter(c => !c.increment && c !== v),
-      v
-    );
+    funcs = genSelectBy(struct, table, funcs, v);
   });
   return funcs;
 };
@@ -220,11 +222,11 @@ const genSelectBy = (
   struct: string,
   table: Table,
   funcs: StmtFunc[],
-  nc: Column[],
   kc: Column
 ) => {
   let kcField = snakeCaseToPascalCase(kc.name);
   let func = new StmtFunc();
+  let nc = table.columns.filter(v => v !== kc);
   func.sql = "select";
   func.sql += ` ${nc.map(v => `${v.name}`).join(",")}`;
   func.sql += ` from ${table.name}`;
