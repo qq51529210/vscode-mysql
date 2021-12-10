@@ -8,3 +8,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [0.0.1] - 2021-12-01
 - Initial release
+- 
+## [0.1.0] - 2021-12-11
+- Generate go code
