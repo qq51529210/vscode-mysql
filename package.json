@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "publisher": "qq51529210",
   "repository": "https://github.com/qq51529210/vscode-mysql",
-  "icon": "images/mysql.png",
+  "icon": "https://github.com/qq51529210/vscode-mysql/images/mysql.png",
   "license": "MIT",
   "engines": {
     "vscode": "^1.62.0"

@@ -5,17 +5,16 @@ This is a simple mysql management tool.
 ## Features
 
 - Connection Add/Remove.
-  ![image](./images/readme/connection.png)
-- Schema Add/Remove.
-- Table Add/Edit/Remove/View.
-  ![image](./images/readme/table.png)
-  ![image](./images/readme/design.png)
-- Collection Add/Remove/View.
-  ![image](./images/readme/collection.png)
-- Mock Data.
-  ![image](./images/readme/mock.png)
-- Generate Access Code.
-  ![image](./images/readme/code.png)
+- Schema Add/Remove.  
+- Table Add/Edit/Remove/View.  
+  ![image](https://github.com/qq51529210/vscode-mysql/images/readme/table.png)
+  ![image](https://github.com/qq51529210/vscode-mysql/images/readme/design.png)
+- Collection Add/Remove/View.  
+  ![image](https://github.com/qq51529210/vscode-mysql/images/readme/collection.png)
+- Mock Data.  
+  ![image](https://github.com/qq51529210/vscode-mysql/images/readme/mock.png)
+- Generate Access Code.  
+  ![image](https://github.com/qq51529210/vscode-mysql/images/readme/code.png)
 
 ## Requirements
 

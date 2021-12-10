@@ -124,12 +124,12 @@ const genInsert = (struct: string, table: Table, funcs: StmtFunc[]) => {
   func.stmt = `stmt${struct}Insert`;
   func.text = `// ${func.sql}`;
   func.text += "\n";
-  func.text += `func (t *${struct}) Insert(){
+  func.text += `func (${table.name} *${struct}) Insert() {
     return ${func.stmt}.Exec(
 `;
   nc.forEach(v => {
     func.text += "\t\t";
-    func.text += `t.${snakeCaseToPascalCase(v.name)},`;
+    func.text += `${table.name}.${snakeCaseToPascalCase(v.name)},`;
     func.text += "\n";
   });
   func.text += "\t)\n}";
@@ -166,16 +166,16 @@ const genUpdateBy = (
   func.stmt = `stmt${struct}UpdateBy${kcField}`;
   func.text = `// ${func.sql}`;
   func.text += "\n";
-  func.text += `func (t *${struct}) UpdateBy${kcField}(){
+  func.text += `func (${table.name} *${struct}) UpdateBy${kcField}() {
     return ${func.stmt}.Exec(
 `;
   nc.forEach(v => {
     func.text += "\t\t";
-    func.text += `t.${snakeCaseToPascalCase(v.name)},`;
+    func.text += `${table.name}.${snakeCaseToPascalCase(v.name)},`;
     func.text += "\n";
   });
   func.text += "\t\t";
-  func.text += `t.${kcField},`;
+  func.text += `${table.name}.${kcField},`;
   func.text += "\n";
   func.text += "\t)\n}";
   funcs.push(func);
@@ -203,8 +203,8 @@ const genDeleteBy = (
   func.stmt = `stmt${struct}DeleteBy${kcField}`;
   func.text = `// ${func.sql}`;
   func.text += "\n";
-  func.text += `func (t *${struct}) DeleteBy${kcField}(){
-    return ${func.stmt}.Exec(t.${kcField})
+  func.text += `func (${table.name} *${struct}) DeleteBy${kcField}() {
+    return ${func.stmt}.Exec(${table.name}.${kcField})
 }`;
   funcs.push(func);
   return funcs;
@@ -235,15 +235,15 @@ const genSelectBy = (
   func.text = `// ${func.sql}`;
   func.text += "\n";
   //
-  let query = initQueryFields(nc, "t");
+  let query = initQueryFields(nc, table.name);
   let nullable = query.filter(v => v.nullName || v.nullType);
   if (nullable.length) {
-    func.text += `func (t *${struct}) SelectBy${kcField}() error {
+    func.text += `func (${table.name} *${struct}) SelectBy${kcField}() error {
     var (
-      ${nullable.map(v => `${v.nullName} ${v.nullType}`).join(",\n")}
+        ${nullable.map(v => `${v.nullName} ${v.nullType}`).join(",\n")}
     )
     err := ${func.stmt}.QueryRow(
-        t.${kcField}
+        ${table.name}.${kcField}
     ).Scan(
         ${query.map(v => v.scan).join(",\n\t\t")}
     )
@@ -256,9 +256,11 @@ ${nullable.map(v => v.nullAssign("")).join("\n\t")}
   } else {
     func.text += `func (t *${struct}) SelectBy${kcField}() error {
     return ${func.stmt}.QueryRow(
-        t.${kcField}
+        ${table.name}.${kcField}
     ).Scan(
-        ${nc.map(v => `t.${snakeCaseToPascalCase(v.name)}`).join(",\n")}
+        ${nc
+          .map(v => `${table.name}.${snakeCaseToPascalCase(v.name)}`)
+          .join(",\n")}
     )
 }`;
   }
@@ -281,7 +283,7 @@ const genSelectPage = (struct: string, table: Table) => {
     buf.WriteString(count)
     rows, err := db.Query(buf.String())
     if err != nil {
-        return err
+        return nil, err
     }`; //
   let query = initQueryFields(table.columns, table.name);
   let nullable = query.filter(v => v.nullName || v.nullType);
@@ -297,7 +299,7 @@ const genSelectPage = (struct: string, table: Table) => {
             ${query.map(v => v.scan).join(",\n\t\t\t")}
         )
         if err != nil {
-          return err
+          return nil, err
         }
 ${nullable.map(v => v.nullAssign("\t")).join("\n\t\t")}
         ${table.name}s = append(${table.name}s, ${table.name})
@@ -312,7 +314,7 @@ ${nullable.map(v => v.nullAssign("\t")).join("\n\t\t")}
             ${query.map(v => v.scan).join(",\n\t\t\t")}
         )
         if err != nil {
-          return err
+          return nil, err
         }
         ${table.name}s = append(${table.name}s, ${table.name})
     }
