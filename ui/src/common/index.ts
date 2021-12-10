@@ -36,6 +36,10 @@ export const alertError = (message: string) => {
   });
 };
 
+export const successMessage = (message: string) => {
+  ElMessage({ type: "success", message: message });
+};
+
 export const errorMessage = (message: string) => {
   ElMessage({ type: "error", message: message });
 };

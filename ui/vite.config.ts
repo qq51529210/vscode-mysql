@@ -21,6 +21,7 @@ export default defineConfig({
         mock: "./src/mock/index.html",
         addTable: "./src/add-table/index.html",
         editTable: "./src/edit-table/index.html",
+        genCode: "./src/gen-code/index.html",
       },
       output: {
         dir: "../dist/web",

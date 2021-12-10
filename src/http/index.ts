@@ -91,8 +91,8 @@ export const listen = (context: vscode.ExtensionContext) => {
       .on("error", err => {
         rej(err);
       })
-      // .listen(33966, "localhost");
-      .listen(0, "localhost");
+      .listen(33966, "localhost");
+    // .listen(0, "localhost");
   });
 };
 

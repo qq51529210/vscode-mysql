@@ -31,7 +31,13 @@ onMounted(() => {
 </script>
 
 <template>
-    <div style="border: 1px solid var(--el-border-color-base)">
-        <textarea ref="textarea" />
-    </div>
+    <textarea ref="textarea" />
 </template>
+
+<style>
+.CodeMirror {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--el-border-color-base);
+}
+</style>

@@ -13,6 +13,7 @@
     "axios": "^0.24.0",
     "element-plus": "^1.2.0-beta.2",
     "sql-formatter": "^4.0.2",
+    "ts-clipboard": "^1.0.17",
     "unplugin-vue-components": "^0.17.2",
     "vue": "^3.2.20",
     "vue-codemirror": "^4.0.6"
