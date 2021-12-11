@@ -31,6 +31,7 @@ const extensionConfig = {
     rules: [
       {
         test: /\.ts$/,
+        include: /src/,
         exclude: /node_modules/,
         use: [
           {
